@@ -166,7 +166,7 @@ local function switchCharacter(name)
 	remote:FireServer(unpack(args))
 end
 
-local ULT_DELAY = 3
+local ULT_DELAY = 2
 
 local C = {
 	bg = Color3.fromRGB(18, 20, 29), bar = Color3.fromRGB(25, 27, 38),
