@@ -153,7 +153,7 @@ local CREDITS = {
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CHARACTER_ID = "136505645200132"
-local ULT_TARGETS = { "Gojo", "Accelerator", "Kratos", "Reigen", "Chara", "Anubis", "Edgerunner", "Hornet", "Mori", "Edward", "Guts"}
+local ULT_TARGETS = { "Gojo", "Accelerator", "Kratos", "Reigen", "Chara", "Anubis", "Edgerunner", "Hornet", "Mori", "Edward", "Guts", "Reigen2"}
 local MOD_COUNT = 5 
 local SCRIPT_COUNT = 1 
 
