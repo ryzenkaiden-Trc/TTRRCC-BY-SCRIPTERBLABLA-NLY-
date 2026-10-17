@@ -136,7 +136,6 @@ local WHITELIST = {
     "roblox_user_5261124396",
     "davigomez72",
     "luckyman15091",
-    "criminalitygamer_67",
 }
 
 local WHITELIST_IDS = {
