@@ -31,8 +31,9 @@ local CONFIG = { Title = "TRC SERVICE", ToggleKey = Enum.KeyCode.RightShift }
 local CREDITS = {
 	{ "Created by", "Scripterblabla", 5585997690 },
 	{ "Developed by", "Redsky", 7225921293 },
-	{ "Tester", "XDXDXDMICUE", "lookup" },
+	{ "Admin", "Criminalitygamer_67", "lookup" },
 	{ "Tester", "luckyman15091", "lookup" },
+	{ "Helper", "XDXDXDMICUE", "lookup" },
 	{ "Version", "1.1.0" },
 }
 
@@ -63,6 +64,7 @@ local function switchCharacter(name)
 end
 
 local ULT_DELAY = 2
+local ULT_TP_POS = Vector3.new(369, 7, -794)
 local KICK_WINDOW = 5
 
 local C = {
@@ -788,16 +790,10 @@ local function sendHiguruma()
 end
 
 local activeHold
-local function holdSpawn()
+local function holdSpawn(startCF)
 	if activeHold then activeHold.stop() end
 	local hold = { alive = true }
-	local cf
-	local function capture()
-		local char = player.Character
-		local root = char and char:FindFirstChild("HumanoidRootPart")
-		if root then cf = root.CFrame + Vector3.new(0, 1.5, 0) end
-	end
-	capture()
+	local cf = startCF
 	local conn = player.CharacterAdded:Connect(function(char)
 		local root = char:WaitForChild("HumanoidRootPart", 5)
 		if not (root and cf) then return end
@@ -808,7 +804,7 @@ local function holdSpawn()
 			RunService.Heartbeat:Wait()
 		end
 	end)
-	hold.capture = capture
+	function hold.setCF(newCF) cf = newCF end
 	function hold.stop()
 		hold.alive = false
 		conn:Disconnect()
@@ -887,39 +883,54 @@ for i, name in ipairs(ULT_TARGETS) do
 		lastLabel.Text = "Last: Higuruma > " .. name
 
 		runUlt("Instant Ult (Higuruma > " .. name .. ")", function()
-			local toast = showToast("Instant Ult", ("Wait for %d seconds. Make sure you don't get hit."):format(ULT_DELAY), ULT_DELAY)
-			local hold = holdSpawn()
-			local hits = watchHits(KICK_WINDOW)
-			local gotHit, kickNow = false, false
-			local ok, err = pcall(function()
-				sendHiguruma()
-				log("INFO", "Higuruma sent - switching to " .. name .. " in " .. ULT_DELAY .. "s")
-				toast.countdown(ULT_DELAY, function() return hits.hit end)
-				if hits.hit then
-					gotHit = true
-					kickNow = hits.kick
-					return
-				end
-				hold.capture()
-				hits.stop()
-				switchCharacter(name)                
-			end)
-			hits.stop()
-			task.delay(3, hold.stop)
-			if ok and gotHit then
-				toast.fail("You got hit! Instant Ult cancelled, try again.", nil, 2.5)
-				if kickNow then
-					task.wait(0.8)
-					TRC.block()
-				end
-				error("you got hit during the countdown", 0)
-			elseif ok then
-				toast.done("Switched to " .. name .. ".")
-			else
-				toast.fail("Something went wrong. Check the Logs tab.")
-				error(err, 0) 
-			end
-		end)
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart")
+	assert(root, "character not found")
+	local homeCF = root.CFrame + Vector3.new(0, 1.5, 0) 
+	local ultCF = CFrame.new(ULT_TP_POS)
+
+	local toast = showToast("Instant Ult", ("Wait for %d seconds. Make sure you don't get hit."):format(ULT_DELAY), ULT_DELAY)
+	local hold = holdSpawn(ultCF)
+	local hits = watchHits(KICK_WINDOW)
+	local gotHit, kickNow = false, false
+	local ok, err = pcall(function()
+		char:PivotTo(ultCF) -- teleport to ult spot
+		root.AssemblyLinearVelocity = Vector3.zero
+		sendHiguruma()
+		log("INFO", "Higuruma sent - switching to " .. name .. " in " .. ULT_DELAY .. "s")
+		toast.countdown(ULT_DELAY, function() return hits.hit end)
+		if hits.hit then
+			gotHit = true
+			kickNow = hits.kick
+			return
+		end
+		hold.setCF(homeCF) 
+		hits.stop()
+		switchCharacter(name)
+	end)
+	hits.stop()
+	task.delay(3, hold.stop)
+
+	if gotHit or not ok then 
+		hold.setCF(homeCF)
+		local c = player.Character
+		if c then c:PivotTo(homeCF) end
+	end
+
+	if ok and gotHit then
+		toast.fail("You got hit! Instant Ult cancelled, try again.", nil, 2.5)
+		if kickNow then
+			task.wait(0.8)
+			TRC.block()
+		end
+		error("you got hit during the countdown", 0)
+	elseif ok then
+		toast.done("Switched to " .. name .. ".")
+	else
+		toast.fail("Something went wrong. Check the Logs tab.")
+		error(err, 0)
+	end
+end)
 
 		b.BackgroundColor3, b.TextColor3 = C.bar, C.text
 		for _, c in ipairs(chipBtns) do c.TextTransparency = c:GetAttribute("Locked") and 0.5 or 0 end
