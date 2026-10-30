@@ -18,6 +18,7 @@ local WHITELIST = {
     "luckyman15091",
     "XDXDXDMICUE",
     "Criminalitygamer_67",
+    "SequoiaMilky",
 }
 
 local WHITELIST_IDS = {
