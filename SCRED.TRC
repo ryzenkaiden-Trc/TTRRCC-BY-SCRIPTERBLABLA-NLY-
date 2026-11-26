@@ -21,6 +21,7 @@ local WHITELIST = {
     "SequoiaMilky",
     "stealadexter123",
     "valcospp",
+    "system_40277",
 }
 
 local WHITELIST_IDS = {
